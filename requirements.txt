@@ -1,0 +1,5 @@
+Flask
+pyngrok
+requests
+python-telegram-bot
+cryptography
