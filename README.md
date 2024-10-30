@@ -16,7 +16,7 @@
 
 1. Клонируйте репозиторий:
     ```bash
-    git clone https://github.com/username/nmap-automation-framework.git
+    git clone https://github.com/NazGaf/Nmap-Automation-Framework.git
     cd nmap-automation-framework
     ```
 
