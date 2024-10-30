@@ -5,4 +5,9 @@ cryptography
 python-nmap
 schedule
 quart
+nmap
+json
+aiohttp
+ipaddress
+logging
 
