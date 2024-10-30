@@ -1,21 +1,23 @@
 import nmap
 import json
-import csv
 import os
 import asyncio
 import ipaddress
 import schedule
 import time
 from datetime import datetime
-from flask import Flask, request, jsonify
+from quart import Quart, request, jsonify
 from cryptography.fernet import Fernet
+import logging
 from telegram import Bot
-from telegram.ext import Updater
 
-# Конфигурация для Telegram уведомлений
-TELEGRAM_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
-CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
+# Конфиденциальные данные загружаются из переменных среды
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 bot = Bot(token=TELEGRAM_TOKEN)
+
+# Настройка логирования
+logging.basicConfig(filename='scan_log.txt', level=logging.INFO, format='[%(asctime)s] %(message)s')
 
 # Генерация ключа для шифрования
 def generate_key():
@@ -25,25 +27,27 @@ def generate_key():
 key = generate_key()
 cipher = Fernet(key)
 
-app = Flask(__name__)
+app = Quart(__name__)
 
-# Логирование и обработка событий
+# Логирование событий
 def log_event(event):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open("scan_log.txt", "a") as log_file:
-        log_file.write(f"[{timestamp}] {event}\n")
-    print(f"[{timestamp}] {event}")
+    logging.info(event)
+    print(event)
 
 # Уведомление в Telegram
 def send_telegram_message(message):
-    bot.send_message(chat_id=CHAT_ID, text=message)
+    try:
+        bot.send_message(chat_id=CHAT_ID, text=message)
+    except Exception as e:
+        log_event(f"Ошибка отправки сообщения в Telegram: {e}")
 
-# Валидация IP
+# Валидация IP-адреса
 def validate_ip(ip):
     try:
         ipaddress.ip_network(ip)
         return True
     except ValueError:
+        log_event(f"Неверный IP адрес: {ip}")
         return False
 
 # Выбор аргументов для nmap
@@ -75,7 +79,7 @@ def scan_network(target, scan_type):
     send_telegram_message(f"Сканирование {target} завершено.")
     return results
 
-# Обработка результатов
+# Обработка результатов сканирования
 def process_scan_results(scanner):
     results = []
     for host in scanner.all_hosts():
@@ -104,7 +108,6 @@ def save_scan_results(results, target, scan_type):
     os.makedirs("encrypted_results", exist_ok=True)
     path = os.path.join("encrypted_results", filename)
 
-    # Шифрование данных
     encrypted_data = cipher.encrypt(json.dumps(results).encode())
     with open(path, "wb") as enc_file:
         enc_file.write(encrypted_data)
@@ -116,18 +119,15 @@ async def async_scan(targets, scan_type):
     tasks = [asyncio.to_thread(scan_network, target, scan_type) for target in targets]
     await asyncio.gather(*tasks)
 
-# Планировщик
+# Планировщик асинхронного сканирования
 def schedule_scan(target, scan_type, interval):
-    schedule.every(interval).minutes.do(scan_network, target=target, scan_type=scan_type)
+    schedule.every(interval).minutes.do(lambda: asyncio.run(async_scan([target], scan_type)))
     log_event(f"Запланировано сканирование {target} каждые {interval} минут.")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
 
-# API для удаленного запуска сканирования
+# API для запуска сканирования через POST-запрос
 @app.route('/scan', methods=['POST'])
-def start_scan():
-    data = request.json
+async def start_scan():
+    data = await request.json
     target = data.get('target')
     scan_type = data.get('scan_type', 'SYN')
 
@@ -145,17 +145,26 @@ def decrypt_results(file_path):
     return json.loads(decrypted_data)
 
 # Главная функция
-def main():
-    # Настройки инициализации
+async def main():
+    # Инициализация
     log_event("Скрипт запущен как служба.")
     targets = ["192.168.1.1", "192.168.1.2"]
     scan_type = "TCP"
 
     # Асинхронный запуск
-    asyncio.run(async_scan(targets, scan_type))
+    await async_scan(targets, scan_type)
+
+    # Запуск планировщика в фоновом режиме
+    interval = 30  # интервал в минутах
+    for target in targets:
+        schedule_scan(target, scan_type, interval)
 
     # Запуск API-сервера
-    app.run(port=5000)
+    await app.run_task(port=5000)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
 
 if __name__ == "__main__":
     main()
