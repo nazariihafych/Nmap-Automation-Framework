@@ -3,3 +3,5 @@ pyngrok
 requests
 python-telegram-bot
 cryptography
+python-nmap
+schedule
