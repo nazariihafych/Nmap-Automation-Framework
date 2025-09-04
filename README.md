@@ -30,9 +30,14 @@
 
 3. Создайте файл `.env` в корне проекта для хранения конфиденциальных данных (например, токенов):
     ```plaintext
-    TELEGRAM_TOKEN=your_telegram_bot_token
-    CHAT_ID=your_telegram_chat_id
-    ENCRYPTION_KEY=your_generated_encryption_key
+    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+    TELEGRAM_CHAT_ID=your_chat_id
+    FERNET_KEY=your_encryption_key_here
+    INITIAL_TASKS=[{"target":"192.168.1.1","scan_type":"TCP","interval":30}]
+
+    # Nmap настройки
+    NMAP_HOST_TIMEOUT_SEC=300
+    NMAP_MAX_RETRIES=2
     ```
 
 4. Настройте Telegram-бота, добавьте его токен в `.env` и укажите ключ шифрования (ENCRYPTION_KEY), который нужно сгенерировать при первом запуске и сохранить для расшифровки данных.
