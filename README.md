@@ -1,5 +1,7 @@
-![image](https://github.com/user-attachments/assets/bf3b6c99-52f8-4718-a704-4874d331bf50)
-
+<div align="center" style="max-width: 800px; margin: 0 auto; padding: 20px; background-color: #0D1117; border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <img src="https://github.com/user-attachments/assets/bf3b6c99-52f8-4718-a704-4874d331bf50" 
+       width="203" 
+       style="border-radius: 50%; border: 4px solid #58A6FF; margin: 30px 0; box-shadow: 0 4px 8px rgba(88, 166, 255, 0.5);" />
 
 # Nmap Automation Framework
 
