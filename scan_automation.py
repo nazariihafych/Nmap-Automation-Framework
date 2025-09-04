@@ -13,6 +13,26 @@ from logging.handlers import RotatingFileHandler
 from telegram import Bot
 from telegram.error import TelegramError
 
+"""
+Быстрое сканирование:
+curl -X POST http://localhost:5000/scan \
+    -H "Content-Type: application/json" \
+    -d '{"target": "127.0.0.1", "scan_type": "Ping"}'
+
+Планирование сканирования:
+curl -X POST http://localhost:5000/schedule \
+    -H "Content-Type: application/json" \
+    -d '{"target": "192.168.1.1", "scan_type": "TCP", "interval": 10}'
+
+Управление задачами:
+# Список задач
+curl http://localhost:5000/tasks
+# Отмена задачи
+curl -X DELETE http://localhost:5000/tasks/192.168.1.1-TCP
+# Health check
+curl http://localhost:5000/health
+"""
+
 # Глобальные переменные
 start_time = datetime.now()
 VERSION = "1.0.0"
