@@ -27,8 +27,10 @@ curl -X POST http://localhost:5000/schedule \
 Управление задачами:
 # Список задач
 curl http://localhost:5000/tasks
+
 # Отмена задачи
 curl -X DELETE http://localhost:5000/tasks/192.168.1.1-TCP
+
 # Health check
 curl http://localhost:5000/health
 """
