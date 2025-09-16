@@ -41,7 +41,7 @@ VERSION = "1.0.0"
 
 # Настройка логирования с ротацией
 logging.basicConfig(
-    handlers=[RotatingFileHandler('scan_log.txt', maxBytes=10*1024*1024, backupCount=5)],
+    handlers=[RotatingFileHandler('/app/logs/scan_log.txt', maxBytes=10*1024*1024, backupCount=5)],
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
