@@ -1,13 +1,9 @@
-pyngrok
-requests
 python-telegram-bot
 cryptography
 python-nmap
-schedule
 quart
-nmap
-json
+pyngrok
+requests
+schedule
 aiohttp
-ipaddress
-logging
 
