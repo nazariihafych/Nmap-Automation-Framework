@@ -16,12 +16,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копирование кода
 COPY --chown=app:app . .
 
-# Создание директорий
-RUN mkdir -p encrypted_results && chown app:app encrypted_results
+# Создание директорий для логов и зашифрованных результатов
+RUN mkdir -p encrypted_results logs && chown -R app:app encrypted_results logs
 
 USER app
 
 EXPOSE 5000
-VOLUME ["/app/encrypted_results", "/app/scan_log.txt"]
+
+# Монтируем директории для сохранения данных и логов
+VOLUME ["/app/encrypted_results", "/app/logs"]
 
 CMD ["python", "scan_automation.py"]
