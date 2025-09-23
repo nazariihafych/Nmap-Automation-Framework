@@ -66,12 +66,25 @@ NMAP_MAX_RETRIES = os.getenv("NMAP_MAX_RETRIES")  # например "2" или 
 # Генерация/загрузка ключа для шифрования
 FERNET_KEY = os.getenv("FERNET_KEY")
 if not FERNET_KEY:
+    raise RuntimeError(
+        "FERNET_KEY не задан! Укажите его в .env или переменных окружения. "
+        "Без него нельзя расшифровать старые файлы!"
+    )
+FERNET_KEY = FERNET_KEY.strip()  # Удаляем невидимые символы
+cipher = Fernet(FERNET_KEY.encode())
+
+"""
+# Генерация/загрузка ключа для шифрования
+FERNET_KEY = os.getenv("FERNET_KEY")
+if not FERNET_KEY:
     FERNET_KEY = Fernet.generate_key().decode()
     logging.warning(
         "FERNET_KEY не задан. Сгенерирован новый ключ. Сохрани его для повторного использования!"
     )
+    print(f"ВНИМАНИЕ: Сгенерирован новый ключ шифрования: {FERNET_KEY}")
     logging.warning(f"Новый ключ: {FERNET_KEY}")
 cipher = Fernet(FERNET_KEY.encode())
+"""
 
 print("=== DEBUG FERNET KEY ===")
 print(f"Raw value: [{FERNET_KEY}]")
@@ -272,7 +285,7 @@ async def periodic_scan(target: str, scan_type: str, interval_minutes: float):
         f"Запущено периодическое сканирование {target} каждые {interval_minutes} минут"
     )
     await send_telegram_message(
-        f"🔄 Запущено периодическое сканирование {target} каждые {interval_minutes} минут"
+        f"Запущено периодическое сканирование {target} каждые {interval_minutes} минут"
     )
     while True:
         try:
