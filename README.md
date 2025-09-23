@@ -104,6 +104,9 @@ print(decrypted_data)
 - `scan_log.txt - журнал событий и ошибок.
 - `requirements.txt - список зависимостей.
 - `.env - конфиденциальные данные, такие как токены и ID чата.
+- `LICENSE
+- `README.md
+- `dockerignore
 ```
 
 ## Примеры
