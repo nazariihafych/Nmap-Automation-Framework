@@ -12,6 +12,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from telegram import Bot
 from telegram.error import TelegramError
+from dotenv import load_dotenv
+load_dotenv()
 
 """
 Быстрое сканирование:
@@ -69,6 +71,15 @@ if not FERNET_KEY:
     )
     logging.warning(f"Новый ключ: {FERNET_KEY}")
 cipher = Fernet(FERNET_KEY.encode())
+
+print("=== DEBUG FERNET KEY ===")
+print(f"Raw value: [{FERNET_KEY}]")
+print(f"Length: {len(FERNET_KEY)}")
+print(f"Last 5 chars: [{FERNET_KEY[-5:]}]")
+print(f"repr: {repr(FERNET_KEY)}")
+print("=========================")
+
+FERNET_KEY = FERNET_KEY.strip()
 
 app = Quart(__name__)
 scan_tasks = {}  # Для хранения активных задач

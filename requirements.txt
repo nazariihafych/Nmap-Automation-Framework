@@ -6,4 +6,5 @@ pyngrok
 requests
 schedule
 aiohttp
+python-dotenv
 
