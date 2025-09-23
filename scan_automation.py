@@ -13,6 +13,7 @@ from logging.handlers import RotatingFileHandler
 from telegram import Bot
 from telegram.error import TelegramError
 from dotenv import load_dotenv
+
 load_dotenv()
 
 """
@@ -208,14 +209,12 @@ async def save_scan_results_async(results: dict, target: str, scan_type: str):
             enc_file.write(encrypted_data)
         log_event(f"Результаты сохранены в {path}")
         await send_telegram_message(
-            f"✅ Сканирование {target} завершено. Результаты: {filename}"
+            f"Сканирование {target} завершено. Результаты: {filename}"
         )
     except Exception as e:
         err = f"Ошибка сохранения результатов: {e}"
         log_event(err)
-        await send_telegram_message(
-            f"❌ Ошибка сохранения результатов для {target}: {e}"
-        )
+        await send_telegram_message(f"Ошибка сохранения результатов для {target}: {e}")
 
 
 async def async_scan(target: str, scan_type: str):
@@ -225,7 +224,7 @@ async def async_scan(target: str, scan_type: str):
     except Exception as e:
         err = f"Ошибка при сканировании {target} ({scan_type}): {e}"
         log_event(err)
-        await send_telegram_message(f"❌ {err}")
+        await send_telegram_message(f" {err}")
         raise
     if results:
         await save_scan_results_async(results, target, scan_type)
@@ -263,7 +262,7 @@ async def start_scan():
     except Exception as e:
         err = f"API ошибка в /scan: {e}"
         log_event(err)
-        await send_telegram_message(f"❌ API ошибка: {e}")
+        await send_telegram_message(f" API ошибка: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -285,7 +284,7 @@ async def periodic_scan(target: str, scan_type: str, interval_minutes: float):
         except Exception as e:
             err = f"Ошибка периодического сканирования {target}: {e}"
             log_event(err)
-            await send_telegram_message(f"❌ {err}")
+            await send_telegram_message(f" {err}")
         try:
             await asyncio.sleep(interval_minutes * 60)
         except asyncio.CancelledError:
@@ -354,7 +353,7 @@ async def cancel_task(task_id):
         scan_tasks[task_id].cancel()
         del scan_tasks[task_id]
         log_event(f"Задача {task_id} отменена")
-        await send_telegram_message(f"⏹️ Задача {task_id} отменена")
+        await send_telegram_message(f" Задача {task_id} отменена")
         return jsonify({"message": f"Задача {task_id} отменена"}), 200
     return jsonify({"error": "Задача не найдена"}), 404
 
@@ -468,7 +467,7 @@ async def main():
 
     await stop_event.wait()
     log_event("Получен сигнал остановки")
-    await send_telegram_message("🛑 Nmap Automation Framework останавливается")
+    await send_telegram_message(" Nmap Automation Framework останавливается")
 
     # Отмена всех задач
     for task in scan_tasks.values():
@@ -485,7 +484,7 @@ async def main():
         log_event("Принудительная остановка задач по таймауту")
 
     log_event("Сервис остановлен")
-    await send_telegram_message("✅ Nmap Automation Framework остановлен")
+    await send_telegram_message(" Nmap Automation Framework остановлен")
 
 
 if __name__ == "__main__":
