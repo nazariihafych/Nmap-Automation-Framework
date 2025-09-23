@@ -4,8 +4,6 @@ __pycache__/
 
 *.so
 encrypted_results/
-decrypt.py
-decrypt/
 scan_log/
 
 .Python

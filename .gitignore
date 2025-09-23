@@ -15,8 +15,6 @@ env.bak/
 venv.bak/
 
 # Logs and runtime-generated data
-logs/
-/app/logs/
 scan_log.txt
 scan_log.json
 scan_log.db
@@ -25,8 +23,6 @@ scan_log.db
 encrypted_results/
 *.enc
 
-# Temporary / debug scripts
-decrypt.py
 
 # Dependency management
 poetry.lock
