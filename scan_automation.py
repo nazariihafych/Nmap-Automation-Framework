@@ -93,8 +93,6 @@ print(f"Last 5 chars: [{FERNET_KEY[-5:]}]")
 print(f"repr: {repr(FERNET_KEY)}")
 print("=========================")
 
-FERNET_KEY = FERNET_KEY.strip()
-
 app = Quart(__name__)
 scan_tasks = {}  # Для хранения активных задач
 
