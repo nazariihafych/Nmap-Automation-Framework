@@ -457,7 +457,7 @@ async def load_initial_tasks():
 
 async def main():
     log_event(f"Сервис запущен (версия {VERSION})")
-    await send_telegram_message(f"🚀 Nmap Automation Framework v{VERSION} запущен")
+    await send_telegram_message(f"Nmap Automation Framework v{VERSION} запущен")
 
     # Загрузка начальных задач
     await load_initial_tasks()
