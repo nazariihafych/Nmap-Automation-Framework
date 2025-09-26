@@ -101,12 +101,15 @@ rate_limits = defaultdict(list)
 RATE_LIMIT_WINDOW = 60  # 60 seconds
 MAX_REQUESTS_PER_WINDOW = 10
 
+
 def get_scan_type_choices() -> str:
     return ", ".join(f"'{k}'" for k in SUPPORTED_SCAN_TYPES.keys())
+
 
 def log_event(event: str):
     logging.info(event)
     print(event)
+
 
 async def send_telegram_message(message: str):
     if not bot:
@@ -119,17 +122,18 @@ async def send_telegram_message(message: str):
     except Exception as e:
         log_event(f"Unexpected error sending Telegram message: {e}")
 
+
 def validate_ip_or_host(target: str) -> bool:
     """Enhanced secure validation of IPs, subnets, and domains"""
     if not target or len(target) > 255:
         return False
-    
+
     # Block potential injections
-    dangerous_chars = [';', '&', '|', '`', '$', '(', ')', '<', '>', '\\', ' ']
+    dangerous_chars = [";", "&", "|", "`", "$", "(", ")", "<", ">", "\\", " "]
     if any(char in target for char in dangerous_chars):
         log_event(f"Potential injection detected in target address: {target}")
         return False
-    
+
     try:
         # Check as IP network
         ipaddress.ip_network(target, strict=False)
@@ -137,7 +141,10 @@ def validate_ip_or_host(target: str) -> bool:
     except ValueError:
         try:
             # Check domain (without command injection)
-            if re.match(r'^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9])*$', target):
+            if re.match(
+                r"^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9])*$",
+                target,
+            ):
                 socket.gethostbyname(target)
                 return True
             return False
@@ -145,11 +152,12 @@ def validate_ip_or_host(target: str) -> bool:
             log_event(f"Invalid address or domain: {target}")
             return False
 
+
 def build_scan_args(scan_type: str) -> str:
     """Safe construction of scan arguments"""
     if scan_type not in SUPPORTED_SCAN_TYPES:
         raise ValueError(f"Invalid scan_type: {scan_type}")
-    
+
     # Sanitize timeouts
     try:
         timeout = int(HOST_TIMEOUT_SEC)
@@ -157,10 +165,10 @@ def build_scan_args(scan_type: str) -> str:
             timeout = 300
     except (ValueError, TypeError):
         timeout = 300
-    
+
     base = SUPPORTED_SCAN_TYPES[scan_type]
     extra = [f"--host-timeout {timeout}s"]
-    
+
     if NMAP_MAX_RETRIES:
         try:
             retries = int(NMAP_MAX_RETRIES)
@@ -168,8 +176,9 @@ def build_scan_args(scan_type: str) -> str:
                 extra.append(f"--max-retries {retries}")
         except (ValueError, TypeError):
             pass
-    
+
     return f"{base} {' '.join(extra)}"
+
 
 def scan_network(target: str, scan_type: str):
     """
@@ -178,14 +187,13 @@ def scan_network(target: str, scan_type: str):
     """
     scanner = nmap.PortScanner()
     scan_args = build_scan_args(scan_type)
-    log_event(
-        f"Starting scan {target} with type {scan_type} and args: {scan_args}"
-    )
+    log_event(f"Starting scan {target} with type {scan_type} and args: {scan_args}")
 
     # IMPORTANT: Don't pass timeout= to scan(), this is not cross-version compatible.
     scanner.scan(target, arguments=scan_args)
 
     return process_scan_results(scanner)
+
 
 def process_scan_results(scanner: nmap.PortScanner) -> dict:
     results = {
@@ -218,6 +226,7 @@ def process_scan_results(scanner: nmap.PortScanner) -> dict:
         results["hosts"].append(host_data)
     return results
 
+
 async def save_scan_results_async(results: dict, target: str, scan_type: str):
     if not results:
         return
@@ -233,28 +242,27 @@ async def save_scan_results_async(results: dict, target: str, scan_type: str):
         with open(path, "wb") as enc_file:
             enc_file.write(encrypted_data)
         log_event(f"Results saved to {path}")
-        await send_telegram_message(
-            f"Scan {target} completed. Results: {filename}"
-        )
+        await send_telegram_message(f"Scan {target} completed. Results: {filename}")
     except Exception as e:
         err = f"Error saving results: {e}"
         log_event(err)
         await send_telegram_message(f"Error saving results for {target}: {e}")
+
 
 async def async_scan(target: str, scan_type: str):
     """Enhanced version with better error handling"""
     loop = asyncio.get_running_loop()
     try:
         # Additional validation of targets
-        if target.count('/') > 1:  # Suspicious format
+        if target.count("/") > 1:  # Suspicious format
             raise ValueError("Invalid target address format")
-        
+
         results = await loop.run_in_executor(None, scan_network, target, scan_type)
-        
+
         # Log successful scan
         log_event(f"Scan {target} ({scan_type}) completed successfully")
         return results
-        
+
     except nmap.PortScannerError as e:
         err = f"Nmap error scanning {target}: {e}"
         log_event(err)
@@ -266,28 +274,31 @@ async def async_scan(target: str, scan_type: str):
         await send_telegram_message(f"Scan error: {err}")
         raise
 
+
 def check_rate_limit():
     """Check rate limit"""
     client_ip = request.remote_addr
     now = time.time()
-    
+
     # Remove old requests
     rate_limits[client_ip] = [
-        req_time for req_time in rate_limits[client_ip] 
+        req_time
+        for req_time in rate_limits[client_ip]
         if now - req_time < RATE_LIMIT_WINDOW
     ]
-    
+
     if len(rate_limits[client_ip]) >= MAX_REQUESTS_PER_WINDOW:
         return False
-    
+
     rate_limits[client_ip].append(now)
     return True
+
 
 @app.route("/scan", methods=["POST"])
 async def start_scan():
     if not check_rate_limit():
         return jsonify({"error": "Rate limit exceeded"}), 429
-    
+
     try:
         data = await request.json
         if not data:
@@ -301,9 +312,7 @@ async def start_scan():
 
         if scan_type not in SUPPORTED_SCAN_TYPES:
             return jsonify(
-                {
-                    "error": f"Invalid scan_type. Available: {get_scan_type_choices()}"
-                }
+                {"error": f"Invalid scan_type. Available: {get_scan_type_choices()}"}
             ), 400
 
         if not validate_ip_or_host(target):
@@ -311,20 +320,17 @@ async def start_scan():
 
         log_event(f"Received scan request: {target}, type: {scan_type}")
         results = await async_scan(target, scan_type)
-        return jsonify(
-            results or {"message": "Scan completed without results"}
-        ), 200
+        return jsonify(results or {"message": "Scan completed without results"}), 200
     except Exception as e:
         err = f"API error in /scan: {e}"
         log_event(err)
         await send_telegram_message(f"API error: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 async def periodic_scan(target: str, scan_type: str, interval_minutes: float):
     """Async periodic scanning"""
-    log_event(
-        f"Started periodic scan {target} every {interval_minutes} minutes"
-    )
+    log_event(f"Started periodic scan {target} every {interval_minutes} minutes")
     await send_telegram_message(
         f"Started periodic scan {target} every {interval_minutes} minutes"
     )
@@ -344,11 +350,12 @@ async def periodic_scan(target: str, scan_type: str, interval_minutes: float):
         except asyncio.CancelledError:
             break
 
+
 @app.route("/schedule", methods=["POST"])
 async def add_scheduled_scan():
     if not check_rate_limit():
         return jsonify({"error": "Rate limit exceeded"}), 429
-    
+
     try:
         data = await request.json
         if not data:
@@ -363,9 +370,7 @@ async def add_scheduled_scan():
 
         if scan_type not in SUPPORTED_SCAN_TYPES:
             return jsonify(
-                {
-                    "error": f"Invalid scan_type. Available: {get_scan_type_choices()}"
-                }
+                {"error": f"Invalid scan_type. Available: {get_scan_type_choices()}"}
             ), 400
 
         if not validate_ip_or_host(target):
@@ -392,6 +397,7 @@ async def add_scheduled_scan():
         log_event(err)
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/tasks", methods=["GET"])
 async def list_tasks():
     tasks_info = []
@@ -400,6 +406,7 @@ async def list_tasks():
             {"id": task_id, "running": not task.done(), "cancelled": task.cancelled()}
         )
     return jsonify(tasks_info), 200
+
 
 @app.route("/tasks/<task_id>", methods=["DELETE"])
 async def cancel_task(task_id):
@@ -411,6 +418,7 @@ async def cancel_task(task_id):
         return jsonify({"message": f"Task {task_id} cancelled"}), 200
     return jsonify({"error": "Task not found"}), 404
 
+
 def get_disk_space():
     """Check free space"""
     try:
@@ -418,34 +426,38 @@ def get_disk_space():
         return {
             "total_gb": round(total / (1024**3), 2),
             "free_gb": round(free / (1024**3), 2),
-            "used_percent": round((used / total) * 100, 2)
+            "used_percent": round((used / total) * 100, 2),
         }
     except:
         return {"error": "Cannot get disk info"}
+
 
 @app.route("/health", methods=["GET"])
 async def health_check():
     # Check Nmap availability
     try:
         import subprocess
-        result = subprocess.run(['nmap', '--version'], 
-                              capture_output=True, timeout=5)
+
+        result = subprocess.run(["nmap", "--version"], capture_output=True, timeout=5)
         nmap_available = result.returncode == 0
     except:
         nmap_available = False
-    
-    return jsonify({
-        "status": "healthy" if nmap_available else "unhealthy",
-        "version": VERSION,
-        "tasks_count": len(scan_tasks),
-        "telegram_configured": bot is not None,
-        "uptime": str(datetime.now() - start_time),
-        "fernet_key_configured": FERNET_KEY is not None,
-        "nmap_available": nmap_available,
-        "disk_space": get_disk_space(),
-        "max_requests_per_window": MAX_REQUESTS_PER_WINDOW,
-        "rate_limit_window": RATE_LIMIT_WINDOW,
-    }), 200
+
+    return jsonify(
+        {
+            "status": "healthy" if nmap_available else "unhealthy",
+            "version": VERSION,
+            "tasks_count": len(scan_tasks),
+            "telegram_configured": bot is not None,
+            "uptime": str(datetime.now() - start_time),
+            "fernet_key_configured": FERNET_KEY is not None,
+            "nmap_available": nmap_available,
+            "disk_space": get_disk_space(),
+            "max_requests_per_window": MAX_REQUESTS_PER_WINDOW,
+            "rate_limit_window": RATE_LIMIT_WINDOW,
+        }
+    ), 200
+
 
 @app.route("/api/docs", methods=["GET"])
 async def api_docs():
@@ -483,26 +495,32 @@ async def api_docs():
         }
     ), 200
 
-@app.websocket('/ws/scan-results')
+
+@app.websocket("/ws/scan-results")
 async def ws_scan_results():
     """WebSocket for real-time scan updates"""
     client_id = request.remote_addr
     log_event(f"WebSocket connected: {client_id}")
-    
+
     try:
         while True:
             # Send result updates
             if scan_tasks:
                 active_tasks = {k: not v.done() for k, v in scan_tasks.items()}
-                await websocket.send(json.dumps({
-                    "type": "task_update",
-                    "active_tasks": active_tasks,
-                    "total_tasks": len(scan_tasks)
-                }))
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "task_update",
+                            "active_tasks": active_tasks,
+                            "total_tasks": len(scan_tasks),
+                        }
+                    )
+                )
             await asyncio.sleep(5)  # Update every 5 seconds
     except:
         log_event(f"WebSocket disconnected: {client_id}")
         pass
+
 
 async def load_initial_tasks():
     """Load initial tasks from environment variable"""
@@ -538,6 +556,7 @@ async def load_initial_tasks():
         log_event(f"Error in INITIAL_TASKS structure: {e}")
     except Exception as e:
         log_event(f"Error loading INITIAL_TASKS: {e}")
+
 
 async def main():
     log_event(f"Service started (version {VERSION})")
@@ -580,6 +599,7 @@ async def main():
 
     log_event("Service stopped")
     await send_telegram_message("Nmap Automation Framework stopped")
+
 
 if __name__ == "__main__":
     try:
