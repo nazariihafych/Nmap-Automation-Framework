@@ -1,174 +1,101 @@
-<div align="center" style="max-width: 800px; margin: 0 auto; padding: 20px; background-color: #0D1117; border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-  <img src="https://github.com/user-attachments/assets/bf3b6c99-52f8-4718-a704-4874d331bf50" 
-       width="203" 
-       style="border-radius: 50%; border: 4px solid #58A6FF; margin: 30px 0; box-shadow: 0 4px 8px rgba(88, 166, 255, 0.5);" />
+<div align="center" style="max-width: 800px; margin: 0 auto; padding: 20px; background-color: #0D1117; color: #C9D1D9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); line-height: 1.6;">
+  <img src="https://github.com/user-attachments/assets/bf3b6c99-52f8-4718-a704-4874d331bf50"
+       width="203"
+       style="border-radius: 50%; border: 4px solid #58A6FF; margin: 30px 0; box-shadow: 0 4px 8px rgba(88, 166, 255, 0.5);"
+       alt="Nmap Automation Framework Logo" />
 
-# Nmap Automation Framework
+  <h1 style="color: #FFFFFF; margin: 20px 0;">Nmap Automation Framework</h1>
 
-**Nmap Automation Framework** —это улучшенный Python-скрипт для автоматизации сетевого сканирования с использованием `nmap`. Данный инструмент разработан для этичных хакеров, системных администраторов и специалистов по сетевой безопасности и поддерживает асинхронное и запланированное сканирование, удаленное управление через API, шифрование результатов и уведомления через Telegram.
+  <p><strong>Nmap Automation Framework</strong> is an enhanced Python script for automating network scanning using <code>nmap</code>. Designed for ethical hackers, system administrators, and cybersecurity professionals, it supports asynchronous and scheduled scans, remote control via API, encrypted result storage, and Telegram notifications.</p>
 
-## Основные возможности
+  <h2 style="color: #58A6FF; margin-top: 30px;">Key Features</h2>
+  <ul style="text-align: left; padding-left: 20px;">
+    <li>Asynchronous and scheduled scanning (including SYN, TCP, UDP, OS detection, Aggressive, and Ping scans).</li>
+    <li>RESTful API for remote scan execution built with Quart (asynchronous Flask).</li>
+    <li>Results encryption using AES (via Fernet) and secure storage in encrypted files.</li>
+    <li>Telegram notifications upon scan completion or errors.</li>
+    <li>Flexible configuration via environment variables and API parameters.</li>
+    <li>Comprehensive logging for monitoring and diagnostics.</li>
+    <li>Input validation for IP addresses, CIDR ranges, and domain names.</li>
+  </ul>
 
-- Асинхронное и запланированное сканирование (в том числе SYN, TCP, UDP, OS detection, Aggressive и Ping).
-- API для удаленного запуска сканирования через Flask.
-- Поддержка шифрования результатов (AES), сохранение данных в зашифрованных файлах.
-- Telegram уведомления о завершении сканирования или при ошибках.
-- Гибкая настройка через аргументы командной строки.
-- Логирование событий для упрощения мониторинга и диагностики.
-- Валидация IP-адресов перед запуском.
+  <h2 style="color: #58A6FF; margin-top: 30px;">Installation</h2>
+  <ol style="text-align: left; padding-left: 20px;">
+    <li>Clone the repository:
+      <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code>git clone https://github.com/nazariihafych/Nmap-Automation-Framework.git
+cd Nmap-Automation-Framework</code></pre>
+    </li>
+    <li>Install dependencies:
+      <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code>pip install -r requirements.txt</code></pre>
+    </li>
+    <li>Create a <code>.env</code> file in the project root:
+      <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code>TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+FERNET_KEY=your_44_char_fernet_key_here
+INITIAL_TASKS=[{"target":"192.168.1.1","scan_type":"TCP","interval":30}]
 
-## Установка
+# Nmap settings
+NMAP_HOST_TIMEOUT_SEC=300
+NMAP_MAX_RETRIES=2</code></pre>
+    </li>
+  </ol>
 
-1. Клонируйте репозиторий:
-    ```bash
-    git clone https://github.com/NazGaf/Nmap-Automation-Framework.git
-    cd nmap-automation-framework
-    ```
+  <h2 style="color: #58A6FF; margin-top: 30px;">Quick Start</h2>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto;"><code>python scan_automation.py</code></pre>
 
-2. Установите зависимости:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. Создайте файл `.env` в корне проекта для хранения конфиденциальных данных (например, токенов):
-    ```plaintext
-    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-    TELEGRAM_CHAT_ID=your_chat_id
-    FERNET_KEY=your_encryption_key_here
-    INITIAL_TASKS=[{"target":"192.168.1.1","scan_type":"TCP","interval":30}]
-
-    # Nmap настройки
-    NMAP_HOST_TIMEOUT_SEC=300
-    NMAP_MAX_RETRIES=2
-    ```
-
-4. Настройте Telegram-бота, добавьте его токен в `.env` и укажите ключ шифрования (ENCRYPTION_KEY), который нужно сгенерировать при первом запуске и сохранить для расшифровки данных.
-
-## Быстрый запуск
-
-Для быстрого запуска скрипта выполните:
-```bash
-python scan_automation.py
-```
-Скрипт начнет асинхронное сканирование заданных IP-адресов и поднимет API-сервер для удаленного управления сканированием.
-
-## Использование
-
-**Запуск с параметрами**
-
-Скрипт поддерживает параметры командной строки для гибкого использования:
-
-- `--target` - IP адрес или диапазон для сканирования.
-- `--scan_type` - Тип сканирования (`SYN`, `TCP`, `UDP`, `Aggressive`, `OS`, `Ping`).
-- `--save_format` - Формат для сохранения результатов (`json`, `csv`).
-- `--interval` - Интервал сканирования в минутах для запланированного сканирования.
-- `--async` - Использовать асинхронное сканирование.
-
-**Пример:**
-```bash
-python scan_automation.py --target 192.168.1.1 --scan_type TCP --save_format csv --interval 30 --async
-```
-## API для удаленного запуска сканирования
-
-API позволяет запускать сканирование удаленно через HTTP-запросы.
-
-**Пример запроса для запуска сканирования:**
-```bash
-curl -X POST http://localhost:5000/scan -H "Content-Type: application/json" -d '{"target": "192.168.1.1", "scan_type": "TCP"}'
-```
-Ответ API вернет результат сканирования в формате JSON.
-
-Telegram уведомления
-Бот Telegram отправляет уведомления при завершении каждого сканирования и сообщает об ошибках. Для работы этой функции необходимо задать переменные `TELEGRAM_TOKEN` и `CHAT_ID` в файле `.env`.
-
-## Шифрование результатов
-
-Все результаты сканирования автоматически сохраняются в зашифрованном виде (AES) и хранятся в папке `encrypted_results`.
-
-Для расшифровки файлов можно использовать функцию `decrypt_results` в коде:
-
-```python
-decrypted_data = decrypt_results("encrypted_results/filename.json")
-print(decrypted_data)
-```
-
-## Логирование
-
-События, такие как ошибки или успешные сканирования, записываются в файл `scan_log.txt` с меткой времени.
-
-**Структура проекта**
-
-```bash
-- `scan_automation.py - основной скрипт для запуска сканирования.
-- `encrypted_results/ - директория для сохранения зашифрованных результатов.
-- `scan_log.txt - журнал событий и ошибок.
-- `requirements.txt - список зависимостей.
-- `.env - конфиденциальные данные, такие как токены и ID чата.
-- `LICENSE
-- `README.md
-- `dockerignore
-```
-
-## Примеры
-
-Запуск асинхронного сканирования для нескольких целей:
-
-```bash
-python scan_automation.py --target 192.168.1.1/24 --scan_type UDP --async
-```
-
-**Планирование периодического сканирования**:
-
-Запустит сканирование 192.168.1.1 с интервалом в 30 минут и сохранит результат в формате JSON.
-```bash
-python scan_automation.py --target 192.168.1.1 --scan_type SYN --interval 30 --save_format json
-```
-
-**Получение уведомлений в Telegram при завершении сканирования**
-
-В `.env` укажите токен бота и ID чата.
-Запустите скрипт с любыми параметрами — уведомления будут отправляться автоматически.
-
-## Требования
-
--Python 3.7+
--`nmap` должен быть установлен и доступен из командной строки.
-Установите `nmap`, если его нет на вашем компьютере:
-
-```bash
-sudo apt-get install nmap  # для Ubuntu/Debian
-brew install nmap          # для macOS
-```
-
-**API для удаленного запуска сканирования**
-
-API позволяет запускать сканирование удаленно через HTTP-запросы.
-Пример запроса для запуска сканирования:
-
-## Пример запроса для запуска сканирования:
-
-```bash
-curl -X POST http://localhost:5000/scan \
+  <h2 style="color: #58A6FF; margin-top: 30px;">Remote API Control</h2>
+  <h3>Run an Immediate Scan</h3>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto;"><code>curl -X POST http://localhost:5000/scan \
   -H "Content-Type: application/json" \
-  -d '{"target": "192.168.1.1", "scan_type": "TCP"}'
-```
+  -d '{"target": "192.168.1.1", "scan_type": "TCP"}'</code></pre>
 
-## Планирование периодического сканирования:
-
-```bash
-curl -X POST http://localhost:5000/schedule \
+  <h3>Schedule a Periodic Scan</h3>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto;"><code>curl -X POST http://localhost:5000/schedule \
   -H "Content-Type: application/json" \
-  -d '{"target": "192.168.1.1", "scan_type": "SYN", "interval": 30}'
-```
+  -d '{"target": "192.168.1.1", "scan_type": "SYN", "interval": 30}'</code></pre>
 
-Ответ API вернет результат сканирования в формате JSON.
+  <h2 style="color: #58A6FF; margin-top: 30px;">Encryption & Decryption</h2>
+  <p>All scan results are automatically saved in encrypted form (using Fernet symmetric encryption) in the <code>encrypted_results/</code> directory.</p>
 
-## Примечания
+  <p>To decrypt a file, use the provided <code>decrypt.py</code> script:</p>
 
-Этот инструмент предназначен для использования в рамках этичного хакинга и должен применяться только к тем сетям, к которым у вас есть разрешение на доступ. Несанкционированное сканирование может быть незаконным в зависимости от местных законов. Автор не несет никакой юридической ответственности за использование данного инструмента. Использование производится на свой собственных страх и риск.
+  <h3>1. Ensure <code>.env</code> contains your key</h3>
+  <p>The same <code>FERNET_KEY</code> used during scanning must be present in your <code>.env</code> file:</p>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code># .env
+FERNET_KEY=AbCdEfGhIjKlMnOpQrStUvWxYz1234567890AbCdEfGhIjKlMnOpQrStUvWxYz1234=</code></pre>
 
-## Рекомендуется использование: AnonSurf
-**УВАГА: Це програмне забезпечення поширюється "ЯК Є" (AS IS), БЕЗ ГАРАНТІЙ.
-Автор не несе відповідальності за будь-яке неправомірне використання, збитки,
-пошкодження чи наслідки використання цього коду.
-Не призначено для використання в шкідливих, небезпечних або протиправних цілях.**
+  <h3>2. Run the decryption script</h3>
+  <p>Pass the encrypted filename as an argument:</p>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code># Decrypt and print to terminal
+python decrypt.py encrypted_results/192.168.1.1_TCP_20240510_120000.json
+
+# Or save to a readable file
+python decrypt.py encrypted_results/192.168.1.1_TCP_20240510_120000.json -o result.json</code></pre>
+
+  <p>💡 <strong>Important:</strong> Never lose your <code>FERNET_KEY</code>! Without it, encrypted results <strong>cannot be recovered</strong>.</p>
+
+  <h2 style="color: #58A6FF; margin-top: 30px;">Requirements</h2>
+  <ul style="text-align: left; padding-left: 20px;">
+    <li>Python 3.7+</li>
+    <li><code>nmap</code> installed and available in your system PATH</li>
+  </ul>
+  <pre style="background: #161B22; color: #C9D1D9; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 10px 0;"><code>sudo apt-get install nmap  # Ubuntu/Debian
+brew install nmap          # macOS</code></pre>
+
+  <h2 style="color: #58A6FF; margin-top: 30px;">Project Structure</h2>
+  <ul style="text-align: left; padding-left: 20px; font-family: monospace;">
+    <li><code>scan_automation.py</code> — main application script</li>
+    <li><code>decrypt.py</code> — utility to decrypt scan results</li>
+    <li><code>encrypted_results/</code> — directory for encrypted scan results</li>
+    <li><code>scan_log.txt</code> — activity and error log file</li>
+    <li><code>requirements.txt</code> — Python dependencies</li>
+    <li><code>.env</code> — sensitive configuration (tokens, keys)</li>
+  </ul>
+
+  <h2 style="color: #FF7B72; margin-top: 30px;">⚠️ Important: Ethical Use Only</h2>
+  <p>This tool is intended <strong>strictly for authorized security testing</strong> on networks you own or have explicit written permission to scan. Unauthorized scanning may violate laws in your jurisdiction.</p>
+  <p style="font-style: italic; color: #8B949E;">
+    This software is provided "AS IS", WITHOUT WARRANTIES OF ANY KIND.<br>
+    The author disclaims all liability for misuse, damages, or consequences arising from its use.
+  </p>
+</div>
