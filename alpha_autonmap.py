@@ -44,7 +44,7 @@ curl http://localhost:5000/health
 
 # Global variables
 start_time = datetime.now()
-VERSION = "1.1.0"
+VERSION = "alpha_1.1.1"
 
 # Configure logging with rotation
 logging.basicConfig(
